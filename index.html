@@ -132,6 +132,78 @@ h1 {
 .d{
     width: 380px;
 }
+body {
+            background-color: black;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: calc(10px + 2vmin);
+            color: white;
+        }
+
+        .push {
+            width: 100%;
+            text-align: center;
+            margin: 20px;
+        }
+
+        .idea-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .idea-item {
+            background-color: #1259a9;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .idea-item button {
+            background-color: red;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .idea-item button {
+            background-color: red;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        #ideaInput {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            width: 60%;
+            max-width: 300px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        #addButton {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #addButton:hover {
+            background-color: #45a049;
+        }
 </style>
 <body >
   <audio src="./videoplayback.m4a" autoplay ></audio>
@@ -238,13 +310,68 @@ h1 {
 
 <p style="text-align: center;"><strong>מגיש אליסף ארוגטי</strong></p>
 <p style="text-align: center;"><strong>ליצירת קשר חייגו 0548520195</strong></p>
-
-    </div>
+<div class="push">
+  <h1>פה ניתן להעלות רעיונות לסדר יום בחופשה שלנו !!</h1>
+  <input type="text" id="ideaInput" placeholder="הכנס רעיון לפעילות">
+  <button id="addButton" onclick="addIdea()">הוסף רעיון</button>
+  <ul id="ideaList" class="idea-list"></ul>
+</div>
     <video src="./audio.mp4" style="width: 380px; border-radius: 20px;" controls autoplay muted loop ></video>
 <br>
+
+
 <p style="text-align: center;"><strong>מוגש בחסות </strong></p>
 <img src="./לוגו מספר 2.png"  style="width: 400px; height: 300px;">
 <br>
+ <script>
+        const apiUrl = 'https://script.google.com/macros/s/AKfycbyAIouRYWOCC7hwXvUh15arpcNJNgw3XUYj9pQsEhHHUdD6AZH4gl1ktnjxmFQGLx1g/exec';
+
+        function addIdea() {
+            const ideaInput = document.getElementById('ideaInput');
+            const ideaText = ideaInput.value.trim();
+
+            if (ideaText !== "") {
+                fetch(`${apiUrl}?action=addIdea&idea=${encodeURIComponent(ideaText)}`)
+                    .then(response => response.text())
+                    .then(id => {
+                        displayIdea(id, ideaText);
+                        ideaInput.value = "";
+                    });
+            }
+        }
+
+        function removeIdea(button) {
+            const ideaItem = button.parentElement;
+            const ideaId = ideaItem.getAttribute('data-id');
+
+            fetch(`${apiUrl}?action=deleteIdea&id=${ideaId}`)
+                .then(() => {
+                    ideaItem.remove();
+                });
+        }
+
+        function displayIdea(id, text) {
+            const ideaList = document.getElementById('ideaList');
+            const newIdea = document.createElement('li');
+            newIdea.className = 'idea-item';
+            newIdea.setAttribute('data-id', id);
+            newIdea.innerHTML = `${text} <button onclick="removeIdea(this)">מחק</button>`;
+            ideaList.appendChild(newIdea);
+        }
+
+        function loadIdeas() {
+            fetch(`${apiUrl}?action=getIdeas`)
+                .then(response => response.json())
+                .then(ideas => {
+                    ideas.forEach(idea => displayIdea(idea.id, idea.text));
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadIdeas);
+    </script>
+    </div>
+</body>
+</html>
 
 </body>
 </html>
